@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎮 Tic-Tac-Toe Pro - Unbeatable AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            height: calc(100% - 70px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 2.2em;
+            margin-bottom: 5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Popup Menu Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .popup-menu, .gameover-menu, .donation-menu {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+            animation: slideIn 0.5s ease;
+            margin: auto;
+            text-align: center;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .popup-title {
+            text-align: center;
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .winner-announcement {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .winner-text {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        /* Donation Styles */
+        .donation-header {
+            font-size: 2em;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+        }
+
+        .creator-name {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            padding: 15px;
+            border-radius: 15px;
+            display: inline-block;
+        }
+
+        .upi-detail {
+            background: linear-gradient(135deg, #667eea10, #764ba210);
+            padding: 30px 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+            border: 3px dashed #667eea;
+        }
+
+        .upi-id {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            word-break: break-all;
+            letter-spacing: 1px;
+        }
+
+        .upi-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            color: #ff6b6b;
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-size: 1.3em;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .copy-btn.copied {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .donation-message {
+            color: #666;
+            font-size: 1.1em;
+            margin: 20px 0;
+            line-height: 1.6;
+            padding: 0 10px;
+        }
+
+        .heart-icon {
+            color: #ff6b6b;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .close-donation {
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .close-donation:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .popup-option {
+            margin-bottom: 25px;
+        }
+
+        .popup-label {
+            display: block;
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .mode-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: white;
+        }
+
+        .difficulty-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .difficulty-select option[value="champion"] {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            font-weight: bold;
+        }
+
+        .difficulty-select:focus {
+            border-color: #667eea;
+        }
+
+        .difficulty-select.champion-mode {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+
+        .sound-toggle {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sound-toggle label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sound-toggle input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
+        .play-again-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .play-again-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-again-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .play-again-btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .play-again-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .players-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 15px;
+        }
+
+        .player {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .player.active {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .player-symbol {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .player-name {
+            font-size: 1em;
+            margin-top: 3px;
+        }
+
+        .vs {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin: 10px 0;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            border-radius: 15px;
+        }
+
+        .score {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .score-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+            aspect-ratio: 1;
+            flex: 0 0 auto;
+        }
+
+        .cell {
+            background: #f8f9fa;
+            border: 3px solid #e9ecef;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            aspect-ratio: 1;
+            color: #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .cell:hover:not(.disabled) {
+            background: #e9ecef;
+            transform: scale(1.05);
+            border-color: #667eea;
+        }
+
+        .cell:active:not(.disabled) {
+            transform: scale(0.95);
+        }
+
+        .cell.x {
+            color: #667eea;
+        }
+
+        .cell.o {
+            color: #764ba2;
+        }
+
+        .cell.winner {
+            background: #c3e6cb;
+            border-color: #28a745;
+            animation: pulse 1s infinite;
+        }
+
+        .cell.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .cell.ai-thinking {
+            border-color: #ff6b6b;
+            animation: thinking 1s infinite;
+        }
+
+        @keyframes thinking {
+            0% { border-color: #ff6b6b; }
+            50% { border-color: #feca57; }
+            100% { border-color: #ff6b6b; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Button Container - Between board and ads */
+        .action-buttons {
+            margin: 10px 0 5px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .settings-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            width: 100%;
+        }
+
+        .settings-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .donate-btn {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            width: 100%;
+        }
+
+        .donate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+        }
+
+        .donate-btn i, .settings-btn i {
+            font-size: 1.3em;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        /* Ad Banner Container */
+        .ad-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            z-index: 999;
+            pointer-events: auto;
+        }
+
+        .ad-container {
+            max-width: 320px;
+            width: 100%;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Ensure game container doesn't overlap with ad */
+        .game-container {
+            margin-bottom: 60px;
+            height: calc(100% - 70px);
+        }
+
+        @media (max-width: 480px) {
+            .game-container { 
+                padding: 15px; 
+            }
+            h1 { 
+                font-size: 1.8em; 
+            }
+            .cell { 
+                font-size: 2.8em; 
+            }
+            .popup-menu, .gameover-menu, .donation-menu { 
+                padding: 30px 20px; 
+            }
+            .player-name {
+                font-size: 0.9em;
+            }
+            .score-value {
+                font-size: 1.5em;
+            }
+            .upi-id {
+                font-size: 1.6em;
+            }
+            .creator-name {
+                font-size: 1.5em;
+            }
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .cell:hover:not(.disabled) {
+                transform: none;
+            }
+            
+            .cell:active:not(.disabled) {
+                transform: scale(0.95);
+            }
+        }
+
+        /* Ensure popups appear above ad */
+        .popup-overlay {
+            z-index: 1001;
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Popup Menu -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-menu">
+            <h2 class="popup-title">🎮 Game Settings</h2>
+            
+            <div class="popup-option">
+                <span class="popup-label">Game Mode</span>
+                <div class="mode-buttons">
+                    <button class="mode-btn active" onclick="selectMode('2player', this)">👥 2 Players</button>
+                    <button class="mode-btn" onclick="selectMode('ai', this)">🤖 vs AI</button>
+                </div>
+            </div>
+
+            <div class="popup-option" id="difficultyOption">
+                <span class="popup-label">AI Difficulty</span>
+                <select class="difficulty-select" id="difficultySelect" onchange="updateDifficultyStyle(this)">
+                    <option value="hard">🔥 Hard (Strategic)</option>
+                    <option value="champion">🏆 Champion (Unbeatable)</option>
+                </select>
+            </div>
+
+            <div class="popup-option">
+                <span class="popup-label">Sound Effects</span>
+                <div class="sound-toggle">
+                    <label>
+                        <input type="checkbox" id="soundToggle" checked> 🔈 Enable Sounds
+                    </label>
+                </div>
+            </div>
+
+            <button class="start-btn" onclick="startGame()">🎯 Start Game</button>
+        </div>
+    </div>
+
+    <!-- Game Over Popup Menu -->
+    <div class="popup-overlay" id="gameOverPopup" style="display: none;">
+        <div class="gameover-menu">
+            <div class="winner-announcement" id="winnerEmoji">🏆</div>
+            <div class="winner-text" id="winnerMessage">Player X Wins!</div>
+            
+            <div class="play-again-buttons">
+                <button class="play-again-btn primary" onclick="playAgain()">🔄 Play Again</button>
+                <button class="play-again-btn secondary" onclick="backToSettings()">⚙️ Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Popup Menu -->
+    <div class="popup-overlay" id="donationPopup" style="display: none;">
+        <div class="donation-menu">
+            <div class="donation-header">❤️ Support the Creator</div>
+            
+            <div class="creator-name">
+                Srimanta Gogoi
+            </div>
+            
+            <div class="upi-detail">
+                <div class="upi-id" id="upiId">6000154161@ptsbi</div>
+                <div class="upi-note">
+                    <span>💝</span>
+                    <span>Paytm ❤️ UPI</span>
+                    <span>💝</span>
+                </div>
+            </div>
+            
+            <button class="copy-btn" id="copyUpiBtn" onclick="copyUPI()">
+                <span>📋</span> Copy UPI ID
+            </button>
+            
+            <div class="donation-message">
+                Your support means the world! 💫<br>
+                Every contribution helps create more awesome games.
+            </div>
+            
+            <button class="close-donation" onclick="closeDonation()">Close</button>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <h1>🎮 Tic-Tac-Toe</h1>
+        
+        <div class="players-info">
+            <div class="player active" id="player1">
+                <span class="player-symbol">X</span>
+                <span class="player-name" id="player1Name">Player 1</span>
+            </div>
+            <span class="vs">VS</span>
+            <div class="player" id="player2">
+                <span class="player-symbol">O</span>
+                <span class="player-name" id="player2Name">Player 2</span>
+            </div>
+        </div>
+
+        <div class="score-board">
+            <div class="score">
+                <div class="score-label" id="scoreXLabel">Player X</div>
+                <div class="score-value" id="scoreX">0</div>
+            </div>
+            <div class="score">
+                <div class="score-label">Draws</div>
+                <div class="score-value" id="scoreDraws">0</div>
+            </div>
+            <div class="score">
+                <div class="score-label" id="scoreOLabel">Player O</div>
+                <div class="score-value" id="scoreO">0</div>
+            </div>
+        </div>
+
+        <div class="board" id="board"></div>
+
+        <!-- Action Buttons - Settings and Support between board and ads -->
+        <div class="action-buttons">
+            <button class="settings-btn" onclick="openSettings()">
+                <i>⚙️</i> Game Settings
+            </button>
+            <button class="donate-btn" onclick="openDonation()">
+                <i>❤️</i> Support the Creator <i>✨</i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Ad Banner -->
+    <div class="ad-banner">
+        <div class="ad-container">
+            <script>
+                atOptions = {
+                    'key' : 'fcde595a44a71be649bd4a7fb7503376',
+                    'format' : 'iframe',
+                    'height' : 50,
+                    'width' : 320,
+                    'params' : {}
+                };
+            </script>
+            <script src="https://www.highperformanceformat.com/fcde595a44a71be649bd4a7fb7503376/invoke.js"></script>
+        </div>
+    </div>
+
+    <script>
+        // Game state variables
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let gameMode = '2player';
+        let difficulty = 'hard';
+        let soundEnabled = true;
+        let aiTimeout = null;
+        
+        // Score tracking
+        let scoreX = 0;
+        let scoreO = 0;
+        let draws = 0;
+
+        // Audio
+        let audioContext = null;
+
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        // Initialize audio
+        function initAudio() {
+            if (!audioContext && soundEnabled) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Play sound
+        function playSound(type) {
+            if (!soundEnabled || !audioContext) return;
+            
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            switch(type) {
+                case 'move':
+                    oscillator.frequency.value = 800;
+                    gainNode.gain.value = 0.1;
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                    break;
+                case 'win':
+                    oscillator.frequency.value = 600;
+                    gainNode.gain.value = 0.2;
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                    
+                    setTimeout(() => {
+                        const osc2 = audioContext.createOscillator();
+                        const gain2 = audioContext.createGain();
+                        osc2.connect(gain2);
+                        gain2.connect(audioContext.destination);
+                        osc2.frequency.value = 800;
+                        gain2.gain.value = 0.2;
+                        osc2.start();
+                        osc2.stop(audioContext.currentTime + 0.2);
+                    }, 150);
+                    break;
+                case 'draw':
+                    oscillator.frequency.value = 400;
+                    gainNode.gain.value = 0.1;
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                    break;
+            }
+        }
+
+        // Update difficulty select style
+        function updateDifficultyStyle(select) {
+            if (select.value === 'champion') {
+                select.classList.add('champion-mode');
+            } else {
+                select.classList.remove('champion-mode');
+            }
+        }
+
+        // Scroll control
+        function disableScroll() {
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+            document.body.style.height = '100%';
+        }
+
+        function enableScroll() {
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+            document.body.style.height = '100%';
+        }
+
+        // Select mode
+        function selectMode(mode, element) {
+            gameMode = mode;
+            
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            const difficultyOption = document.getElementById('difficultyOption');
+            if (mode === 'ai') {
+                difficultyOption.style.display = 'block';
+            } else {
+                difficultyOption.style.display = 'none';
+            }
+        }
+
+        // Update player names
+        function updatePlayerNames() {
+            const player1Name = document.getElementById('player1Name');
+            const player2Name = document.getElementById('player2Name');
+            const scoreXLabel = document.getElementById('scoreXLabel');
+            const scoreOLabel = document.getElementById('scoreOLabel');
+            
+            if (gameMode === 'ai') {
+                player1Name.textContent = 'You';
+                player2Name.textContent = difficulty === 'champion' ? 'Champion AI' : 'Hard AI';
+                scoreXLabel.textContent = 'You (X)';
+                scoreOLabel.textContent = 'AI (O)';
+            } else {
+                player1Name.textContent = 'Player 1';
+                player2Name.textContent = 'Player 2';
+                scoreXLabel.textContent = 'Player X';
+                scoreOLabel.textContent = 'Player O';
+            }
+        }
+
+        // Donation Functions
+        function openDonation() {
+            document.getElementById('donationPopup').style.display = 'flex';
+            disableScroll();
+        }
+
+        function closeDonation() {
+            document.getElementById('donationPopup').style.display = 'none';
+            disableScroll();
+        }
+
+        function copyUPI() {
+            const upiId = document.getElementById('upiId').textContent;
+            navigator.clipboard.writeText(upiId).then(() => {
+                const copyBtn = document.getElementById('copyUpiBtn');
+                copyBtn.innerHTML = '<span>✅</span> Copied!';
+                copyBtn.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<span>📋</span> Copy UPI ID';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                alert('Failed to copy! Please manually copy: ' + upiId);
+            });
+        }
+
+        // Settings Functions
+        function openSettings() {
+            // If game is active, go back to settings popup
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('popupOverlay').style.display = 'flex';
+            
+            if (aiTimeout) {
+                clearTimeout(aiTimeout);
+                aiTimeout = null;
+            }
+            
+            resetScore();
+        }
+
+        // Start game
+        function startGame() {
+            difficulty = document.getElementById('difficultySelect').value;
+            soundEnabled = document.getElementById('soundToggle').checked;
+            
+            document.getElementById('popupOverlay').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+            
+            disableScroll();
+            resetGame();
+            updatePlayerNames();
+            
+            if (soundEnabled) {
+                initAudio();
+            }
+        }
+
+        // Show game over popup
+        function showGameOver(winner) {
+            setTimeout(() => {
+                const winnerEmoji = document.getElementById('winnerEmoji');
+                const winnerMessage = document.getElementById('winnerMessage');
+                
+                if (winner === 'draw') {
+                    winnerEmoji.textContent = '🤝';
+                    winnerMessage.textContent = "It's a Draw!";
+                } else {
+                    if (gameMode === 'ai') {
+                        winnerEmoji.textContent = winner === 'X' ? '👤' : '🤖';
+                        winnerMessage.textContent = winner === 'X' ? 'You Win!' : 'AI Wins!';
+                    } else {
+                        winnerEmoji.textContent = winner === 'X' ? '❌' : '⭕';
+                        winnerMessage.textContent = `Player ${winner} Wins!`;
+                    }
+                }
+                
+                document.getElementById('gameOverPopup').style.display = 'flex';
+                disableScroll();
+            }, 500);
+        }
+
+        // Play again
+        function playAgain() {
+            document.getElementById('gameOverPopup').style.display = 'none';
+            resetGame();
+            updatePlayerNames();
+            disableScroll();
+        }
+
+        // Back to settings
+        function backToSettings() {
+            document.getElementById('gameOverPopup').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('popupOverlay').style.display = 'flex';
+            
+            enableScroll();
+            
+            if (aiTimeout) {
+                clearTimeout(aiTimeout);
+                aiTimeout = null;
+            }
+            
+            resetScore();
+        }
+
+        // Create board
+        function createBoard() {
+            const boardElement = document.getElementById('board');
+            boardElement.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.setAttribute('data-index', i);
+                cell.addEventListener('click', () => handleCellClick(i));
+                cell.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handleCellClick(i);
+                }, { passive: false });
+                boardElement.appendChild(cell);
+            }
+        }
+
+        // Handle cell click
+        function handleCellClick(index) {
+            if (!gameActive || board[index] !== '') return;
+            
+            if (gameMode === 'ai' && currentPlayer !== 'X') return;
+
+            makeMove(index, currentPlayer);
+            playSound('move');
+
+            if (!gameActive) return;
+
+            if (gameMode === 'ai') {
+                currentPlayer = 'O';
+                
+                if (aiTimeout) clearTimeout(aiTimeout);
+                aiTimeout = setTimeout(() => makeAIMove(), 500);
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            }
+            
+            document.getElementById('player1').classList.toggle('active', currentPlayer === 'X');
+            document.getElementById('player2').classList.toggle('active', currentPlayer === 'O');
+        }
+
+        // Make a move
+        function makeMove(index, player) {
+            board[index] = player;
+            const cell = document.querySelector(`[data-index="${index}"]`);
+            cell.textContent = player;
+            cell.classList.add(player.toLowerCase());
+            
+            checkResult();
+        }
+
+        // AI move function
+        function makeAIMove() {
+            aiTimeout = null;
+            
+            if (!gameActive || gameMode !== 'ai' || currentPlayer !== 'O') return;
+
+            const emptyCells = [];
+            for (let i = 0; i < board.length; i++) {
+                if (board[i] === '') emptyCells.push(i);
+            }
+            
+            if (emptyCells.length === 0) return;
+
+            let moveIndex = -1;
+
+            switch(difficulty) {
+                case 'hard':
+                    moveIndex = getDefensiveMove();
+                    break;
+                case 'champion':
+                    moveIndex = getUnbeatableMove();
+                    break;
+            }
+            
+            if (moveIndex === -1 || moveIndex === undefined || board[moveIndex] !== '') {
+                moveIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            }
+
+            if (moveIndex !== -1 && board[moveIndex] === '') {
+                makeMove(moveIndex, 'O');
+                playSound('move');
+                
+                if (gameActive) {
+                    currentPlayer = 'X';
+                    document.getElementById('player1').classList.add('active');
+                    document.getElementById('player2').classList.remove('active');
+                }
+            }
+        }
+
+        // Defensive move
+        function getDefensiveMove() {
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (board[a] === 'O' && board[b] === 'O' && board[c] === '') return c;
+                if (board[a] === 'O' && board[c] === 'O' && board[b] === '') return b;
+                if (board[b] === 'O' && board[c] === 'O' && board[a] === '') return a;
+            }
+
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (board[a] === 'X' && board[b] === 'X' && board[c] === '') return c;
+                if (board[a] === 'X' && board[c] === 'X' && board[b] === '') return b;
+                if (board[b] === 'X' && board[c] === 'X' && board[a] === '') return a;
+            }
+
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === '') {
+                    let threats = 0;
+                    for (let condition of winningConditions) {
+                        const [a, b, c] = condition;
+                        if (i === a && board[b] === 'X' && board[c] === '') threats++;
+                        if (i === b && board[a] === 'X' && board[c] === '') threats++;
+                        if (i === c && board[a] === 'X' && board[b] === '') threats++;
+                    }
+                    if (threats >= 2) return i;
+                }
+            }
+
+            if (board[4] === '') return 4;
+
+            const corners = [0, 2, 6, 8];
+            for (let corner of corners) {
+                if (board[corner] === '') return corner;
+            }
+
+            const edges = [1, 3, 5, 7];
+            for (let edge of edges) {
+                if (board[edge] === '') return edge;
+            }
+
+            return -1;
+        }
+
+        // UNBEATABLE AI - Minimax algorithm
+        function getUnbeatableMove() {
+            let bestScore = -Infinity;
+            let bestMove = -1;
+            
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === '') {
+                    board[i] = 'O';
+                    let score = minimax(board, 0, false);
+                    board[i] = '';
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+            
+            return bestMove;
+        }
+
+        // Minimax algorithm
+        function minimax(board, depth, isMaximizing) {
+            let result = checkWinner();
+            if (result !== null) {
+                if (result === 'O') return 10 - depth;
+                if (result === 'X') return depth - 10;
+                if (result === 'draw') return 0;
+            }
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'O';
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'X';
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        // Check winner for minimax
+        function checkWinner() {
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return board[a];
+                }
+            }
+            
+            if (!board.includes('')) return 'draw';
+            return null;
+        }
+
+        // Check result
+        function checkResult() {
+            let roundWon = false;
+            let winningCombo = null;
+            let winner = null;
+
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    roundWon = true;
+                    winningCombo = [a, b, c];
+                    winner = board[a];
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                winningCombo.forEach(index => {
+                    document.querySelector(`[data-index="${index}"]`).classList.add('winner');
+                });
+                
+                if (winner === 'X') {
+                    scoreX++;
+                    document.getElementById('scoreX').textContent = scoreX;
+                } else {
+                    scoreO++;
+                    document.getElementById('scoreO').textContent = scoreO;
+                }
+
+                gameActive = false;
+                disableAllCells();
+                playSound('win');
+                
+                if (aiTimeout) {
+                    clearTimeout(aiTimeout);
+                    aiTimeout = null;
+                }
+                
+                showGameOver(winner);
+                return;
+            }
+
+            if (!board.includes('')) {
+                draws++;
+                document.getElementById('scoreDraws').textContent = draws;
+                gameActive = false;
+                disableAllCells();
+                playSound('draw');
+                
+                if (aiTimeout) {
+                    clearTimeout(aiTimeout);
+                    aiTimeout = null;
+                }
+                
+                showGameOver('draw');
+                return;
+            }
+        }
+
+        // Disable all cells
+        function disableAllCells() {
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.add('disabled');
+            });
+        }
+
+        // Reset game
+        function resetGame() {
+            if (aiTimeout) {
+                clearTimeout(aiTimeout);
+                aiTimeout = null;
+            }
+            
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('disabled', 'winner', 'x', 'o');
+            });
+
+            document.getElementById('player1').classList.add('active');
+            document.getElementById('player2').classList.remove('active');
+        }
+
+        // Reset score
+        function resetScore() {
+            scoreX = 0;
+            scoreO = 0;
+            draws = 0;
+            document.getElementById('scoreX').textContent = scoreX;
+            document.getElementById('scoreO').textContent = scoreO;
+            document.getElementById('scoreDraws').textContent = draws;
+        }
+
+        // Initialize
+        createBoard();
+        
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        });
+
+        document.getElementById('difficultyOption').style.display = 'none';
+        disableScroll();
+    </script>
+</body>
+</html>
